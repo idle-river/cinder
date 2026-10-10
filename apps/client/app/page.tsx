@@ -9,6 +9,10 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { useQuery } from "@tanstack/react-query";
+import { api } from "@/lib/api";
+import { useState, useEffect } from "react";
+import { toast } from "sonner";
 
 const posts = [
   {
@@ -65,6 +69,31 @@ const communities = [
 ];
 
 export default function Home() {
+  const {
+    data: rawPosts,
+    error: postsError,
+    isLoading: postsLoad,
+    isError: postsIsErr,
+    isSuccess: postsSuccess,
+  } = useQuery({
+    queryKey: ["posts"],
+    queryFn: async () => {
+      return await api.post.get();
+    },
+  });
+
+  const [posts, setPosts] = useState(null);
+
+  useEffect(() => {
+    if (rawPosts && rawPosts.data?.ok) {
+      setPosts(rawPosts.data.data);
+    }
+
+    if (postsIsErr) {
+      toast.error(postsError!.message);
+    }
+  }, [postsLoad, postsIsErr, postsLoad, postsSuccess]);
+
   return (
     <div className="min-h-dvh bg-gradient-to-b from-orange-50/60 via-background to-background dark:from-orange-950/10">
       <TopBar />

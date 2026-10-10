@@ -18,6 +18,7 @@ export const communities = pgTable("community", {
   id: text("id").primaryKey(),
   name: text("name").notNull().unique(),
   title: text("title").notNull(),
+  stars: integer("stars").default(0),
   description: text("description"),
   image: text("image"),
   banner: text("banner"),

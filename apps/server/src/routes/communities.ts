@@ -1,15 +1,22 @@
-import { db, posts } from "@/lib/db";
+import { communities, db } from "../../lib/db";
 import Elysia from "elysia";
 
 export default new Elysia({ name: "communities", prefix: "/community" })
-  // Basic feed for a anon user
-  // Will add a authed /feed endpoint
+  // Basic trending communities
   .get("/", async () => {
-    const result = await db.select().from(posts).limit(10);
+    const result = await db.select().from(communities).limit(5);
     if (result) {
+      const sorted = result.sort((a, b) => {
+        if (a.stars && b.stars) {
+          return a.stars - b.stars;
+        } else {
+          return 0;
+        }
+      });
+
       return {
         ok: true,
-        data: result,
+        data: sorted,
       };
     } else {
       return {

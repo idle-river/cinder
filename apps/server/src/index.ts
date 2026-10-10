@@ -2,6 +2,7 @@ import cors from "@elysia/cors";
 import { auth } from "../lib/auth";
 import { Elysia } from "elysia";
 import communities from "./routes/communities";
+import posts from "./routes/posts";
 
 const app = new Elysia()
   .use(
@@ -10,6 +11,7 @@ const app = new Elysia()
     }),
   )
   .use(communities)
+  .use(posts)
   .mount("/auth", auth.handler)
   .listen(3000);
 
