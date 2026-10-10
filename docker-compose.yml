@@ -73,9 +73,6 @@ services:
   rustfs:
     image: rustfs/rustfs:1.0.1
     restart: unless-stopped
-    depends_on:
-      rustfs-volume-permission-helper:
-        condition: service_completed_successfully
     environment:
       RUSTFS_ACCESS_KEY: ${S3_ACCESS_KEY_ID}
       RUSTFS_SECRET_KEY: ${S3_SECRET_ACCESS_KEY}
