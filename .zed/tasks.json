@@ -1,0 +1,14 @@
+[
+  {
+    // Runs the db studio for GUI access to the DB
+    "label": "Database Studio",
+    "command": "bun db:studio",
+    "cwd": "$ZED_WORKTREE_ROOT/apps/server",
+  },
+  {
+    // Runs the app in development
+    "label": "Run App in Development",
+    "command": "bun dev",
+    "cwd": "$ZED_WORKTREE_ROOT",
+  },
+]
