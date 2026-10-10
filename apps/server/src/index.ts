@@ -1,7 +1,17 @@
+import cors from "@elysia/cors";
 import { auth } from "../lib/auth";
 import { Elysia } from "elysia";
+import communities from "./routes/communities";
 
-const app = new Elysia().mount("/auth", auth.handler).listen(3000);
+const app = new Elysia()
+  .use(
+    cors({
+      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    }),
+  )
+  .use(communities)
+  .mount("/auth", auth.handler)
+  .listen(3000);
 
 export type App = typeof app;
 
