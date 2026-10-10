@@ -1,5 +1,5 @@
 {
-  "name": "@turborepo-starter-project/server",
+  "name": "@cinder/server",
   "version": "1.0.50",
   "exports": {
     ".": {
