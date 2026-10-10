@@ -4,8 +4,16 @@ info:
   seq: 1
 
 http:
-  method: GET
+  method: POST
   url: http://localhost:3000/upload/pictures
+  body:
+    type: multipart-form
+    data:
+      - name: picture
+        type: file
+        value:
+          - /Users/Maaz/Downloads/Screenshots/3b3d44de-da56-40f4-b425-e3140891fa0b.jpeg
+        contentType: image/jpeg
   auth: inherit
 
 settings:

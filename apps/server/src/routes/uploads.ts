@@ -40,7 +40,7 @@ export default new Elysia({
     }
 
     // Store the processed image.
-    const key = `pictures/${crypto.randomUUID()}.webp`;
+    const key = `pfps/${crypto.randomUUID()}.webp`;
 
     try {
       await s3.write(key, compressed, {
