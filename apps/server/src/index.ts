@@ -8,7 +8,7 @@ import author from "./routes/author";
 const app = new Elysia()
   .use(
     cors({
-      origin: process.env.FRONTEND_URL || "http://localhost:3000",
+      origin: process.env.FRONTEND_URL || "http://localhost:5173",
     }),
   )
   .use(communities)

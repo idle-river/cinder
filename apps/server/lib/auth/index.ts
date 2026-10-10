@@ -1,9 +1,11 @@
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { admin, haveIBeenPwned } from "better-auth/plugins";
+import { admin, haveIBeenPwned, username } from "better-auth/plugins";
 import * as schema from "../db/schema/auth";
 import { passkey } from "@better-auth/passkey";
 import { betterAuth } from "better-auth";
 import { db } from "../db";
+import { ProfanityParser } from "../utils/profanity";
+import entries from "../../data/profanity.json";
 
 const rpID =
   process.env.BETTER_AUTH_URL?.replace(/^https?:\/\//, "") || "localhost";
@@ -18,6 +20,8 @@ const logLevel: "error" | "debug" | "info" | "warn" =
   resolvedLogLevel === "debug"
     ? resolvedLogLevel
     : "info";
+
+const checker = new ProfanityParser(entries);
 
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
@@ -58,6 +62,29 @@ export const auth = betterAuth({
       },
       advanced: {
         webAuthnChallengeCookie: "cinder",
+      },
+    }),
+    username({
+      minUsernameLength: 3,
+      maxUsernameLength: 20,
+      usernameValidator: (username) => {
+        if (username === "admin") {
+          return false;
+        }
+
+        if (checker.has(username)) {
+          return false;
+        }
+
+        return true;
+      },
+      displayUsernameValidator: (displayUsername) => {
+        if (checker.has(displayUsername)) {
+          return false;
+        }
+
+        // Allow only alphanumeric characters, underscores, and hyphens
+        return /^[a-zA-Z0-9_-]+$/.test(displayUsername);
       },
     }),
   ],
