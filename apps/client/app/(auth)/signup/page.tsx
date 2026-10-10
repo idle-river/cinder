@@ -35,6 +35,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
+import { toast } from "sonner";
+import { api } from "@/lib/api";
 
 type FormState = {
   name: string;
@@ -51,9 +53,18 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(max, Math.max(min, value));
 }
 
-async function fakeUploadToS3(domain: string) {
-  await new Promise((resolve) => setTimeout(resolve, 1000));
-  return `https://ui-avatars.com/api/?name=${encodeURIComponent(domain || "domain")}&background=random`;
+async function uploadToS3(image: Blob): Promise<string | undefined> {
+  const response = await api.upload.pictures.post({
+    picture: new File([image], "profile.webp", {
+      type: "image/webp",
+    }),
+  });
+
+  if (response.error) {
+    throw new Error("Failed to upload profile picture");
+  }
+
+  return response.data.key;
 }
 
 async function loadImage(source: string) {
@@ -217,9 +228,9 @@ export default function SignupPage() {
       const localPreview = URL.createObjectURL(blob);
       setCroppedPreview(localPreview);
 
-      const domain =
-        form.username || form.displayUsername || form.name || "domain";
-      const uploadedUrl = await fakeUploadToS3(domain);
+      const imageKey = await uploadToS3(blob);
+
+      const uploadedUrl = `${process.env.S3_ENDPOINT}/cinder/${imageKey}`;
       updateField("imageUrl", uploadedUrl);
 
       setCropDialogOpen(false);
@@ -394,7 +405,7 @@ export default function SignupPage() {
                                 Image ready
                               </p>
                               <p className="line-clamp-2 text-xs text-muted-foreground">
-                                {form.imageUrl}
+                                {form.imageUrl.split("/").pop()}
                               </p>
                             </div>
                           </div>
@@ -447,7 +458,6 @@ export default function SignupPage() {
                             label="Display Username"
                             value={form.displayUsername}
                           />
-                          <SummaryRow label="Image URL" value={form.imageUrl} />
                         </dl>
 
                         <Button
