@@ -11,4 +11,10 @@
     "command": "bun dev",
     "cwd": "$ZED_WORKTREE_ROOT",
   },
+  {
+    // Runs Docker Compose (DEVELOPMENT)
+    "label": "Docker Compose DB + S3",
+    "command": "podman compose up postgres rustfs rustfs-init",
+    "cwd": "$ZED_WORKTREE_ROOT",
+  },
 ]

@@ -8,14 +8,15 @@ export default new Elysia({
 }).post(
   "/pictures",
   async ({ body, set }) => {
-    try {
-      const { picture } = body;
+    const { picture } = body;
 
-      // Read the uploaded file into memory.
+    let compressed: Buffer;
+
+    // Decode, resize, and compress the image.
+    try {
       const input = Buffer.from(await picture.arrayBuffer());
 
-      // Resize and compress to WebP.
-      const compressed = await sharp(input, {
+      compressed = await sharp(input, {
         limitInputPixels: 40_000_000,
       })
         .rotate()
@@ -25,24 +26,41 @@ export default new Elysia({
           fit: "inside",
           withoutEnlargement: true,
         })
-        .webp({ quality: 80, effort: 4 })
+        .webp({
+          quality: 80,
+          effort: 4,
+        })
         .toBuffer();
+    } catch {
+      set.status = 400;
 
-      const key = `pictures/${crypto.randomUUID()}.webp`;
+      return {
+        error: "Invalid or unsupported image",
+      };
+    }
 
+    // Store the processed image.
+    const key = `pictures/${crypto.randomUUID()}.webp`;
+
+    try {
       await s3.write(key, compressed, {
         type: "image/webp",
       });
+    } catch (error) {
+      console.error("Failed to upload image to S3:", error);
+
+      set.status = 500;
 
       return {
-        key,
-        contentType: "image/webp",
-        size: compressed.byteLength,
+        error: "Failed to store image",
       };
-    } catch {
-      set.status = 400;
-      return { error: "Invalid or unsupported image" };
     }
+
+    return {
+      key,
+      contentType: "image/webp",
+      size: compressed.byteLength,
+    };
   },
   {
     body: t.Object({
