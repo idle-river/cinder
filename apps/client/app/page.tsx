@@ -1,47 +1,150 @@
+import { Flame, Heart, MessageCircle, Users } from "lucide-react";
+
+import { TopBar } from "@/components/top-bar";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+
+const posts = [
+  {
+    id: 1,
+    author: "maaz",
+    community: "build-in-public",
+    title: "Just shipped the first Cinder homepage mock 🔥",
+    content:
+      "Kept it minimal for now: top bar, feed cards, and a community panel. Next up is wiring this to real data.",
+    likes: 38,
+    comments: 12,
+    postedAt: "2h ago",
+  },
+  {
+    id: 2,
+    author: "sarah",
+    community: "product-design",
+    title: "Thoughts on social feed density?",
+    content:
+      "Do you prefer spacious cards or compact rows for fast scrolling? I’m testing both for a creator-focused feed.",
+    likes: 24,
+    comments: 9,
+    postedAt: "5h ago",
+  },
+  {
+    id: 3,
+    author: "devon",
+    community: "frontend",
+    title: "Tailwind + shadcn feels really fast for MVP UI",
+    content:
+      "Swapped out a raw layout for shadcn cards and the app already feels much more structured. Great for iteration.",
+    likes: 57,
+    comments: 16,
+    postedAt: "1d ago",
+  },
+];
+
+const communities = [
+  {
+    id: 1,
+    name: "build-in-public",
+    members: "8.2k members",
+  },
+  {
+    id: 2,
+    name: "frontend",
+    members: "12.4k members",
+  },
+  {
+    id: 3,
+    name: "product-design",
+    members: "5.7k members",
+  },
+];
+
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+    <div className="min-h-dvh bg-gradient-to-b from-orange-50/60 via-background to-background dark:from-orange-950/10">
+      <TopBar />
+
+      <main className="mx-auto grid w-full max-w-6xl grid-cols-1 gap-6 px-4 py-6 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+        <section className="space-y-4">
+          <div className="space-y-1">
+            <h1 className="bg-gradient-to-r from-orange-600 to-amber-500 bg-clip-text text-2xl font-bold tracking-tight text-transparent dark:from-orange-300 dark:to-amber-200">
+              Home feed
+            </h1>
+          </div>
+
+          {posts.map((post) => (
+            <Card
+              key={post.id}
+              className="border-orange-200/60 shadow-sm shadow-orange-100/40 dark:border-orange-900/40 dark:shadow-none"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/8 px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm text-orange-700 dark:text-orange-300">
+                    @{post.author} in c/{post.community}
+                  </CardTitle>
+                  <span className="text-xs text-muted-foreground">
+                    {post.postedAt}
+                  </span>
+                </div>
+                <CardDescription className="pt-1 text-base font-medium text-foreground">
+                  {post.title}
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <p className="text-sm text-muted-foreground">{post.content}</p>
+                <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                  <span className="inline-flex items-center gap-1.5 text-rose-500 dark:text-rose-300">
+                    <Heart className="size-4" />
+                    {post.likes}
+                  </span>
+                  <span className="inline-flex items-center gap-1.5 text-sky-600 dark:text-sky-300">
+                    <MessageCircle className="size-4" />
+                    {post.comments}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </section>
+
+        <aside className="space-y-4">
+          <Card className="border-orange-200/60 shadow-sm shadow-orange-100/40 dark:border-orange-900/40 dark:shadow-none">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-base text-orange-700 dark:text-orange-200">
+                <Users className="size-4" />
+                Communities
+              </CardTitle>
+              <CardDescription>
+                Discover and join communities on Cinder.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              {communities.map((community, index) => (
+                <div key={community.id}>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="flex items-center gap-2">
+                      <Flame className="size-4 text-orange-500" />
+                      <span className="text-sm font-medium">
+                        c/{community.name}
+                      </span>
+                    </div>
+                    <span className="text-xs text-muted-foreground">
+                      {community.members}
+                    </span>
+                  </div>
+                  {index !== communities.length - 1 ? (
+                    <Separator className="mt-3" />
+                  ) : null}
+                </div>
+              ))}
+            </CardContent>
+          </Card>
+        </aside>
       </main>
     </div>
   );

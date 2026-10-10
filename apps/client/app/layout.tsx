@@ -6,7 +6,7 @@ import "./globals.css";
 const roboto = Roboto({
   subsets: ["latin"],
   weight: ["400", "500", "700"],
-  variable: "--font-roboto",
+  variable: "--font-sans",
 });
 
 export const metadata: Metadata = {
