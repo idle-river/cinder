@@ -4,6 +4,7 @@ import { Elysia } from "elysia";
 import communities from "./routes/communities";
 import posts from "./routes/posts";
 import author from "./routes/author";
+import uploads from "./routes/uploads";
 
 const app = new Elysia()
   .use(
@@ -17,6 +18,7 @@ const app = new Elysia()
   .use(communities)
   .use(posts)
   .use(author)
+  .use(uploads)
   .mount("/auth", auth.handler)
   .listen(3000);
 
