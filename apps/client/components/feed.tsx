@@ -79,6 +79,7 @@ export default function Feed() {
 
       if (response.error || !response.data?.ok || !response.data.data) {
         const error = response.error?.value;
+        console.error(error);
         toast.error(
           typeof error === "string" ? error : "An unknown error occurred.",
         );
