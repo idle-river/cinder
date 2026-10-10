@@ -1,0 +1,19 @@
+FROM oven/bun:1.4.3-alpine
+
+WORKDIR /app
+
+# Root workspace manifests
+COPY package.json bun.lock ./
+
+# Copy both workspaces
+COPY apps/client ./apps/client
+COPY apps/server ./apps/server
+
+# Install dependencies
+RUN bun install
+
+WORKDIR /app/apps/server
+
+EXPOSE 3000
+
+CMD ["bun", "run", "start"]

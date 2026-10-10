@@ -18,7 +18,8 @@
     "auth:generate": "bunx auth generate --output lib/db/schema/auth.ts"
   },
   "dependencies": {
-    "better-auth": "^1.6.9",
+    "@better-auth/passkey": "1.7.7",
+    "better-auth": "1.7.7",
     "dotenv": "^17.4.2",
     "drizzle-orm": "^0.45.2",
     "elysia": "latest"

@@ -11,6 +11,9 @@ const app = new Elysia()
       origin: process.env.FRONTEND_URL || "http://localhost:5173",
     }),
   )
+  .get("/health", () => {
+    return { ok: true };
+  })
   .use(communities)
   .use(posts)
   .use(author)
