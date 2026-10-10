@@ -19,7 +19,7 @@ const app = new Elysia()
   .use(posts)
   .use(author)
   .use(uploads)
-  .mount("/auth", auth.handler)
+  .mount("/", auth.handler)
   .listen(3000);
 
 export type App = typeof app;

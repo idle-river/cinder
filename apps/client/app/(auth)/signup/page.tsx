@@ -35,8 +35,10 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Progress } from "@/components/ui/progress";
-import { toast } from "sonner";
 import { api } from "@/lib/api";
+import { toast } from "sonner";
+import { authClient } from "@/lib/authClient";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type FormState = {
   name: string;
@@ -54,17 +56,23 @@ function clamp(value: number, min: number, max: number) {
 }
 
 async function uploadToS3(image: Blob): Promise<string | undefined> {
-  const response = await api.upload.pictures.post({
-    picture: new File([image], "profile.webp", {
-      type: "image/webp",
-    }),
-  });
+  try {
+    const response = await api.upload.pictures.post({
+      picture: new File([image], "profile.webp", {
+        type: "image/webp",
+      }),
+    });
 
-  if (response.error) {
-    throw new Error("Failed to upload profile picture");
+    if (response.error) {
+      throw new Error("Failed to upload profile picture");
+    }
+
+    return response.data.url;
+  } catch (err) {
+    console.error(err);
+    toast.error("An unexpected error occured");
+    return undefined;
   }
-
-  return response.data.key;
 }
 
 async function loadImage(source: string) {
@@ -129,6 +137,10 @@ export default function SignupPage() {
     displayUsername: "",
     imageUrl: "",
   });
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const redirectURL = searchParams.get("/redirect") || "/";
 
   const progress = useMemo(() => (step / TOTAL_STEPS) * 100, [step]);
 
@@ -170,10 +182,15 @@ export default function SignupPage() {
         nextErrors.username = "Username is required.";
       } else if (!/^[a-z0-9_]+$/i.test(form.username)) {
         nextErrors.username = "Use letters, numbers, and underscores only.";
+      } else if (form.username.length < 3 || form.username.length > 20) {
+        nextErrors.username = "Username must be between 3 and 20 characters.";
       }
 
       if (!form.displayUsername.trim()) {
         nextErrors.displayUsername = "Display username is required.";
+      } else if (!/^[a-zA-Z0-9_-]+$/.test(form.displayUsername)) {
+        nextErrors.displayUsername =
+          "Use letters, numbers, underscores, and hyphens only.";
       }
     }
 
@@ -228,9 +245,11 @@ export default function SignupPage() {
       const localPreview = URL.createObjectURL(blob);
       setCroppedPreview(localPreview);
 
-      const imageKey = await uploadToS3(blob);
+      const uploadedUrl = await uploadToS3(blob);
+      if (!uploadedUrl) {
+        throw new Error("Could not upload image.");
+      }
 
-      const uploadedUrl = `${process.env.S3_ENDPOINT}/cinder/${imageKey}`;
       updateField("imageUrl", uploadedUrl);
 
       setCropDialogOpen(false);
@@ -257,29 +276,44 @@ export default function SignupPage() {
     if (!validateCurrentStep()) return;
 
     setIsSubmitting(true);
-    await new Promise((resolve) => setTimeout(resolve, 900));
-    setIsSubmitting(false);
 
-    setStep(1);
-    setForm({
-      name: "",
-      email: "",
-      password: "",
-      username: "",
-      displayUsername: "",
-      imageUrl: "",
-    });
+    try {
+      await authClient.signUp.email({
+        name: form.name.trim(),
+        email: form.email.trim(),
+        password: form.password,
+        username: form.username.trim(),
+        displayUsername: form.displayUsername.trim(),
+        image: form.imageUrl,
+      });
 
-    if (selectedImageSource?.startsWith("blob:")) {
-      URL.revokeObjectURL(selectedImageSource);
+      router.push(redirectURL);
+      setForm({
+        name: "",
+        email: "",
+        password: "",
+        username: "",
+        displayUsername: "",
+        imageUrl: "",
+      });
+
+      if (selectedImageSource?.startsWith("blob:")) {
+        URL.revokeObjectURL(selectedImageSource);
+      }
+      if (croppedPreview?.startsWith("blob:")) {
+        URL.revokeObjectURL(croppedPreview);
+      }
+
+      setSelectedImageSource(null);
+      setCroppedPreview(null);
+      setCroppedAreaPixels(null);
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : "Could not create account.";
+      toast.error(message);
+    } finally {
+      setIsSubmitting(false);
     }
-    if (croppedPreview?.startsWith("blob:")) {
-      URL.revokeObjectURL(croppedPreview);
-    }
-
-    setSelectedImageSource(null);
-    setCroppedPreview(null);
-    setCroppedAreaPixels(null);
   }
 
   return (
@@ -367,7 +401,7 @@ export default function SignupPage() {
                           updateField("displayUsername", value)
                         }
                         error={errors.displayUsername}
-                        placeholder="Cinder User"
+                        placeholder="Cinder_User"
                       />
                     </>
                   ) : null}

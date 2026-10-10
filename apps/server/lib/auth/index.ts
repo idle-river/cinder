@@ -23,6 +23,15 @@ const logLevel: "error" | "debug" | "info" | "warn" =
 
 const checker = new ProfanityParser(entries);
 
+const trustedOrigins = [
+  process.env.FRONTEND_URL,
+  process.env.BETTER_AUTH_TRUSTED_ORIGIN,
+  "http://localhost:5173",
+  "http://127.0.0.1:5173",
+  "http://localhost:3000",
+  "http://127.0.0.1:3000",
+].filter((origin): origin is string => Boolean(origin));
+
 export const auth = betterAuth({
   database: drizzleAdapter(db, {
     provider: "pg",
@@ -42,6 +51,7 @@ export const auth = betterAuth({
   session: {
     expiresIn: 60 * 60 * 24, // 1 day in seconds
   },
+  trustedOrigins,
   plugins: [
     admin({
       bannedUserMessage:

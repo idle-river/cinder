@@ -56,8 +56,15 @@ export default new Elysia({
       };
     }
 
+    const publicEndpoint =
+      process.env.S3_PUBLIC_URL ||
+      process.env.S3_ENDPOINT ||
+      "http://localhost:9000";
+    const normalizedEndpoint = publicEndpoint.replace(/\/$/, "");
+
     return {
       key,
+      url: `${normalizedEndpoint}/cinder/${key}`,
       contentType: "image/webp",
       size: compressed.byteLength,
     };
