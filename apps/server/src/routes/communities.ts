@@ -1,5 +1,6 @@
+import { eq } from "drizzle-orm";
 import { communities, db } from "../../lib/db";
-import Elysia from "elysia";
+import Elysia, { t } from "elysia";
 
 export default new Elysia({ name: "communities", prefix: "/community" })
   // Basic trending communities
@@ -24,4 +25,32 @@ export default new Elysia({ name: "communities", prefix: "/community" })
         data: null,
       };
     }
-  });
+  })
+  .get(
+    "/:id",
+    async ({ query }) => {
+      let { communityId } = query;
+
+      const result = await db
+        .select()
+        .from(communities)
+        .where(eq(communities.id, communityId))
+        .limit(1);
+      if (result && result.length > 0) {
+        return {
+          ok: true,
+          data: result[0],
+        };
+      } else {
+        return {
+          ok: false,
+          data: null,
+        };
+      }
+    },
+    {
+      query: t.Object({
+        communityId: t.String(),
+      }),
+    },
+  );
