@@ -1,8 +1,11 @@
 "use client";
 
-import Link from "next/link";
 import { motion } from "framer-motion";
 import { Flame } from "lucide-react";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState } from "react";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -14,8 +17,49 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { authClient } from "@/lib/authClient";
 
 export default function LoginPage() {
+  const [email, setEmail] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const redirectURL = searchParams.get("redirect") ?? "/";
+
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await authClient.signIn.email({
+        email,
+        password,
+      });
+
+      if (error) {
+        toast.error(
+          typeof error.message === "string"
+            ? error.message
+            : "An unknown error has occurred",
+        );
+        return;
+      }
+
+      if (data) {
+        router.push(redirectURL);
+      }
+    } catch (err) {
+      toast.error(err.error.message);
+
+      console.error(err);
+      toast.error("An unknown error occured");
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="min-h-dvh bg-gradient-to-b from-orange-50 via-amber-50/20 to-background px-4 py-12 dark:from-orange-950/20 dark:via-amber-950/10">
       <motion.div
@@ -39,12 +83,15 @@ export default function LoginPage() {
           </CardHeader>
 
           <CardContent>
-            <form className="space-y-4">
+            <form className="space-y-4" onSubmit={handleSubmit}>
               <div className="space-y-1.5">
                 <Label htmlFor="email">Email</Label>
                 <Input
                   id="email"
                   type="email"
+                  value={email}
+                  disabled={isSubmitting}
+                  onChange={(e) => setEmail(e.target.value)}
                   autoComplete="email"
                   placeholder="you@cinder.com"
                 />
@@ -55,6 +102,9 @@ export default function LoginPage() {
                 <Input
                   id="password"
                   type="password"
+                  value={password}
+                  disabled={isSubmitting}
+                  onChange={(e) => setPassword(e.target.value)}
                   autoComplete="current-password"
                   placeholder="Your password"
                 />

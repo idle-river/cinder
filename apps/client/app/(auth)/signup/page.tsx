@@ -278,16 +278,26 @@ export default function SignupPage() {
     setIsSubmitting(true);
 
     try {
-      await authClient.signUp.email({
+      const email = form.email.trim();
+      const password = form.password;
+
+      const res = await authClient.signUp.email({
         name: form.name.trim(),
-        email: form.email.trim(),
-        password: form.password,
+        email,
+        password,
         username: form.username.trim(),
         displayUsername: form.displayUsername.trim(),
         image: form.imageUrl,
       });
 
-      router.push(redirectURL);
+      if (res.data?.user) {
+        await authClient.signIn.email({ email, password });
+        router.push(redirectURL);
+      } else {
+        toast.error(res.error?.message || "An unknown error occurred");
+        setStep(1);
+      }
+
       setForm({
         name: "",
         email: "",
